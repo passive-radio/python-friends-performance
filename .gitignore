@@ -7,3 +7,5 @@ __pycache__/
 *.so
 build/
 **/cython/**/*.c
+*.o
+*.ptx

@@ -2,6 +2,7 @@
 # distutils: extra_link_args = -fopenmp
 # cython: language_level=3
 # cython: boundscheck=False
+# distutils: language = c++
 # cython: wraparound=False
 # cython: cdivision=True
 
@@ -10,7 +11,6 @@ cimport numpy as np
 from cython.parallel import prange
 from libc.stdlib cimport malloc, free
 from cython.parallel cimport parallel
-from cython.parallel cimport prange
 
 ctypedef float DTYPE_t
 
@@ -37,7 +37,7 @@ cdef np.ndarray[DTYPE_t, ndim=1] compute_dot_products(np.ndarray[DTYPE_t, ndim=2
     cdef float[:] results_view = np.zeros(n * m, dtype=np.float32)
     
     with nogil:
-        for i in prange(n, schedule='dynamic', num_threads=12, chunksize=100):
+        for i in prange(n, schedule='static', num_threads=16, chunksize=10):
             vix = vel_i_view[i, 0]
             viy = vel_i_view[i, 1]
             viz = vel_i_view[i, 2]

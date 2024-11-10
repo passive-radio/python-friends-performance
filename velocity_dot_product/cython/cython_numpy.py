@@ -1,7 +1,7 @@
 import time
 import argparse
 import random
-from cython_core import compute_dot_products_py as compute_dot_products
+from cython_numpy import compute_dot_products_py as compute_dot_products
 
 def write_log(log_file: str, message: str) -> None:
     with open(log_file, "a") as f:
@@ -21,7 +21,7 @@ def main():
     parser.add_argument("--log", type=str)
     args = parser.parse_args()
 
-    log_file = f"out/velocity_dot_product/cython_{args.size}_parallel.log"
+    log_file = str(args.log)
     velocities_i, velocities_j = generate_sample_data(args.size)
     total_elapsed_time = 0.0
     

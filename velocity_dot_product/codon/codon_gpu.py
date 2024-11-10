@@ -1,7 +1,7 @@
 import time
 import random
 from python import argparse
-from python import sys as pysys
+# from python import sys as pysys
 import sys
 # from python import sys
 # import sys
@@ -20,7 +20,7 @@ def compute_dot_products(velocities_i: list[tuple[float, float, float]],
     results = [0.0] * (n * m)
     
     idx = 0
-    @par(num_threads=8)
+    @par(gpu=True)
     for i in range(n):
         vix, viy, viz = velocities_i[i]
         for j in range(m):

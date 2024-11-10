@@ -2,10 +2,7 @@ import cupy as cp
 import numpy as np
 import time
 import argparse
-
-def write_log(log_file: str, message: str) -> None:
-    with open(log_file, "a", encoding="utf-8") as f:
-        f.write(message + "\n")
+import logging
 
 # Original implementation
 def compute_dot_products_original(velocities_i: cp.ndarray, velocities_j: cp.ndarray) -> cp.ndarray:
@@ -93,40 +90,37 @@ def benchmark(func, velocities_i, velocities_j, num_runs=10):
 
 # Test and benchmark
 def run_benchmarks(base_filename, size: int):
+    # Test sizes
+    sizes = [size]*2
+    
     print("Running benchmarks...")
     print("\nFormat: mean_time ± std_time (seconds)")
     print("-" * 60)
     
-    N = M = size
-    print(f"\nArray sizes: {N}x3 and {M}x3")
-    
-    # Generate random test data
-    velocities_i = cp.random.random((N, 3), dtype=cp.float32)
-    velocities_j = cp.random.random((M, 3), dtype=cp.float32)
-    
-    # Benchmark each implementation
-    implementations = [
-        # ("original", compute_dot_products_original),
-        ("matmul", compute_dot_products_matmul),
-        # ("cuda_kernel", compute_dot_products_cuda_kernel)
-    ]
-    
-    for name, func in implementations:
-        filename = f"{base_filename}_{size}_{name}.log"
-        write_log(filename, f"Running Cupy({name}) tests for N = {size} ----")
-        mean_time, std_time = benchmark(func, velocities_i, velocities_j)
-        text =f"{name:12}: {mean_time:.6f} ± {std_time:.6f} s" 
-        print(text)
-        write_log(filename, text)
+    for N, M in sizes:
+        print(f"\nArray sizes: {N}x3 and {M}x3")
         
-        # Verify results match original implementation
-        # if name != "Original":
-        #     result = func(velocities_i, velocities_j)
-        #     original_result = compute_dot_products_original(velocities_i, velocities_j)
-        #     max_diff = cp.max(cp.abs(result - original_result))
-        #     text =f"{' '*12}  Max difference from original: {max_diff}" 
-        #     print(text)
-        #     write_log(filename, text)
+        # Generate random test data
+        velocities_i = cp.random.random((N, 3), dtype=cp.float32)
+        velocities_j = cp.random.random((M, 3), dtype=cp.float32)
+        
+        # Benchmark each implementation
+        implementations = [
+            ("Original", compute_dot_products_original),
+            ("Matmul", compute_dot_products_matmul),
+            ("CUDA Kernel", compute_dot_products_cuda_kernel)
+        ]
+        
+        for name, func in implementations:
+            mean_time, std_time = benchmark(func, velocities_i, velocities_j)
+            print(f"{name:12}: {mean_time:.6f} ± {std_time:.6f}")
+            
+            # Verify results match original implementation
+            if name != "Original":
+                result = func(velocities_i, velocities_j)
+                original_result = compute_dot_products_original(velocities_i, velocities_j)
+                max_diff = cp.max(cp.abs(result - original_result))
+                print(f"{' '*12}  Max difference from original: {max_diff}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -134,5 +128,12 @@ if __name__ == "__main__":
     parser.add_argument("--repeat", type=int, default=10)
     parser.add_argument("--log", type=str)
     args = parser.parse_args()
+
+    if args.log:
+        logger.addHandler(logging.FileHandler(args.log))
     
-    run_benchmarks(args.log, args.size)
+    # Generate sample data using cupy (using same seed for consistency)
+    cp.random.seed(0)
+    velocities_i = cp.random.uniform(-1, 1, (args.size, 3), dtype=cp.float32)
+    velocities_j = cp.random.uniform(-1, 1, (args.size, 3), dtype=cp.float32)
+    run_benchmarks()

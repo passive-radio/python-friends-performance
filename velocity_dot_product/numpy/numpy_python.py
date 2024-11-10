@@ -36,7 +36,7 @@ if __name__ == "__main__":
     print(threadpool_info())
     parser = argparse.ArgumentParser()
     parser.add_argument("--size", type=int, help="Size of velocity arrays")
-    parser.add_argument("--repeat", type=int, default=10)
+    parser.add_argument("--repeat", type=int, default=30)
     parser.add_argument("--log", type=str)
     args = parser.parse_args()
 
@@ -56,10 +56,10 @@ if __name__ == "__main__":
         dot_products = compute_dot_products(velocities_i, velocities_j)
         elapsed_time = time.time() - started_at
         total_elapsed_time += elapsed_time
-        logger.info(f"elapsed_time: {elapsed_time:.4f}s at {i}th iteration")
+        logger.info(f"elapsed_time: {elapsed_time:.6f}s at {i}th iteration")
         
         del dot_products
     
     avg_elapsed_time = total_elapsed_time / args.repeat
     # logger.info(f"result size: {len(dot_products)}")
-    logger.info(f"avg_elapsed_time: {avg_elapsed_time:.4f}s")
+    logger.info(f"avg_elapsed_time: {avg_elapsed_time:.6f}s")
